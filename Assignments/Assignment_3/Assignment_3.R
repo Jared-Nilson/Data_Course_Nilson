@@ -161,9 +161,8 @@ seq(2,150,2) # here's the code to get a list of the even numbers between 2 and 1
 dat[seq(2,150,2),]
 
 # 2.  Create a new object called iris_chr which is a copy of iris, except where every column is a character class
-iris_chr <- iris
-as.character((iris_chr[0,]))
-
+iris_chr <- data.frame(lapply(dat, as.character))
+class(iris_chr[0,])
 
 # 3.  Create a new numeric vector object named "Sepal.Area" which is the product of Sepal.Length and Sepal.Width
 class(iris$Sepal.Length)
