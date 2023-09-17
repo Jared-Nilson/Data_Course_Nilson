@@ -1,0 +1,5 @@
+1. Final Project Idea
+
+2.	I want to compare the data of college application and/or graduation rates since 2021 with the decline of covid and the addition of many more online classes.
+	I imagine the data would be across 4 years from 2019-2023 involving different sections ofhit college it is, graduation rates per semester (data might change solely based off summer vs fall vs spring semester would have to be considered) compared to how many online classes they offered that semester. 
+3. The plot of data would be seperated by colleges and each college will show over the 4 year period the online classes offered with the graduation numbers. It may be plots seperated by colleges or it could be averaged data across the colleges looked at. Facet_wrap would work for this seperating by college.
