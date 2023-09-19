@@ -32,7 +32,7 @@ colnames(state_max_fatality_rate)<-c("Province_State","Maximum_Fatality_Ratio")
 state_max_fatality_rate#should be the exact data frame requested.
 print(state_max_fatality_rate, n=51)
 #V
-ggplot(state_max_fatality_rate, aes(x= Province_State, y = Maximum_Fatality_Ratio, color= Province_State)) +
+ggplot(state_max_fatality_rate, aes(x= reorder(Province_State, -Maximum_Fatality_Ratio), y = Maximum_Fatality_Ratio, color= Province_State)) +
   geom_bar(stat = "identity") +
   ylim(0,6) +
   theme(axis.text.x=element_text(angle = 90))+
