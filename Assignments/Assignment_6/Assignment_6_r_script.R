@@ -20,6 +20,8 @@ dat <- dat %>%
                values_to = "absorbance", names_prefix = "hr_")%>%
   mutate_at(c('hour'), as.numeric)
 print(dat, n=900)
+
+#shouldve used "case_when" so I could do them all at once
 #FIRST GRAPH
 dilution_1 <- dat %>% subset(dat$dilution == .1)
 
@@ -45,5 +47,5 @@ itplot<-ggplot(it1, aes(x=hour, y=mean_absorbance, color=sample_id))+
   facet_wrap(it1$dilution) +
   labs(x= "Time", y="Mean_Absorbance")
 itplot
-itplot + transition_reveal(along = hour, range = NULL)
+itplot + transition_reveal(hour)
 #I keep getting an invalid times argument and nothing online is helping not sure if it's just my computer or not
