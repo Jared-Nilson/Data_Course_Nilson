@@ -1,0 +1,8 @@
+1. It doesn't seem like any of the variables are completely meaningless as the best model used all the variables in it's function for determining predictions.
+2.Yes as I stated in my code it seems like there was a bell curve response to the nitrogen levels. https://www.geeksforgeeks.org/non-linear-regression-in-r/
+3.nonlinear <- read_csv("C:/Users/18017/Desktop/Data_Course_Nilson/Data/non_linear_relationship.csv")
+nonlinear
+fit <- lm(response ~ poly(predictor, 2), data = nonlinear)
+ggplot(nonlinear, aes(x=predictor, y=response)) +
+  geom_point() +
+  geom_line(aes(x=predictor, predict(fit)))
