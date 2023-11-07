@@ -1,0 +1,91 @@
+---
+title: "PRACTICE"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+
+date: "`r Sys.Date()`"
+---
+
+##Today is `r Sys.Date()`
+#CONTROL ALT I to make new code chunk
+###control shift K for knit
+##setup is the name of this code chunk vvv
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(janitor)
+library(easystats)
+```
+
+## R Markdown
+#wrap in <> to add a link or put [NAME](link)
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars, echo=TRUE, fig.height=3, fig.width=3}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE, fig.height=3, fig.width=3,fig.align='left'}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+NEW STUFF 
+```{r MPG PLOT}
+mpg%>%names
+mpg %>%
+  ggplot(aes(x=displ,y=cty))+
+  geom_point() +
+  geom_smooth(method="lm", formula = y ~log(x))
+```
+
+```{r MODELS}
+library(easystats)
+library(MASS)
+library(modelr)
+mod1 <-glm(data=mpg,formula = cty ~ log(displ))
+mod2 <-glm(data=mpg,formula = cty ~ displ*year*cyl*model+trans)
+step <- stepAIC(mod2)
+#step$formula
+mbest<-glm(data = mpg, 
+           formula = step$formula)
+mbest %>% plot
+
+compare_performance(mod1,mod2,mbest)
+
+compare_performance(mod1,mod2,mbest) %>% plot
+
+
+```
+
+
+```{r Predicted vs actual}
+
+predictions <-
+  add_predictions(mpg,mbest)
+predictions
+predictions %>% 
+  ggplot(aes(x=displ)) +
+  geom_point(aes(y=cty,color="Actual")) +
+  geom_point(aes(y=pred,color="Predicted"))
+```
+
+```{r}
+df <- mbest %>%broom::tidy()
+df %>%
+  filter(p.value <.05)
+
+df
+
+```
+

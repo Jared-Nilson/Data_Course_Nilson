@@ -1,0 +1,110 @@
+---
+title: "Assignment_9"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+loading packages
+
+___
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(easystats)
+library(GGally)
+library(modelr)
+library(MASS)
+```
+___
+# First I read the csv into a data frame and made the admit column logical.
+
+```{r}
+df <- read_csv("C:/Users/18017/Desktop/Data_Course_Nilson/Data/GradSchool_Admissions.csv")
+df<- df%>%
+  mutate(admit = as.logical(admit))
+df
+```
+
+___
+
+# Now lets take a look at the data
+
+```{r}
+df %>% 
+  dplyr::select(gre,gpa,rank,admit) %>% 
+  ggpairs()
+```
+
+
+Clearly each column plays a role in whether the person was admitted to grad school.
+There are probably other factors as well but I'll just be exploring these 3.
+
+___
+
+# Now I'll make a few models considering each of the factors to analyze and then get the best model
+
+```{r message=FALSE,warning=FALSE}
+m1<- glm(data = df, 
+          formula = admit ~ gre,
+          family = 'binomial')
+m2<- glm(data = df, 
+          formula = admit ~ gpa,
+          family = 'binomial')
+m3<- glm(data = df, 
+          formula = admit ~ rank,
+          family = 'binomial')
+m4<- glm(data = df, 
+          formula = admit ~ gre +gpa,
+          family = 'binomial')
+m5 <- glm(data = df, 
+          formula = admit ~ gre +gpa +rank,
+          family = 'binomial')
+m6 <- glm(data = df, 
+          formula = admit ~ gre*gpa*rank,
+          family = 'binomial')
+
+```
+
+
+___
+
+# Now I'll use stepAIC to get the most ideal formula from the complicated m6
+
+```{r message=FALSE, warning=FALSE}
+step <- stepAIC(m6)
+step$formula
+mbest<-glm(data = df, 
+           formula = step$formula)
+```
+
+___
+
+# Then I'll compare the performance of each of these models using the *performance* package
+
+```{r message=FALSE,warning=FALSE}
+compare <- compare_performance(m1,m2,m3,m4,m5,m6,mbest,
+                    rank=TRUE)
+compare
+
+# and a plot of that table
+compare %>% plot()
+```
+
+From the comparison it seems that the simpler M5 is actually the most ideal and not the stepAIC generated mbest, so we'll use m5 for predictions.
+
+___
+
+Now lets add the predictors from m5 and plot it 
+
+```{r}
+add_predictions(df,m5,type='response')  
+add_predictions(df,m5,type='response')  %>% 
+  ggplot(aes(x=gpa,y=pred,color=factor(rank))) +
+  geom_smooth()
+```
+
+This plot shows the percentage likelihood that someone will be accepted into grad school based of our model predictor and shows the rank and gpa.
