@@ -1,0 +1,90 @@
+---
+title: "Exam 3 Jared Nilson"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+___
+
+# Tasks:
+  
+**1. Load and clean FacultySalaries_1995.csv file and Re-create the graph below...**
+
+```{r, echo=FALSE, fig.align='center',fig.width=5,fig.height=5}
+knitr::include_graphics("./Fig1.png")
+```
+
+
+# Loading R programs
+```{r Loading, echo=TRUE, warning=FALSE, message=FALSE}
+library(readr)
+library(tidyverse)
+library(janitor)
+library(easystats)
+library(ggplot2)
+
+```
+# Reading in the data
+```{r results=FALSE}
+df <- read_csv("FacultySalaries_1995.csv")
+
+```
+
+After looking at the data and the graph that we are supposed to produce I decide that I'll need new column with the college rank of "assoc" "assist"
+or "full" and then facet wrap by tier(exluding VIIB) where x is the new column and y is the salaries for each one so I need to make a new salary column as well.
+
+```{r echo=TRUE}
+salary <- df %>%
+  select(ends_with(c("Salary","ID","Name","State","Tier")))
+salary <- salary %>%
+  pivot_longer(c(AvgFullProfSalary,AvgAssocProfSalary,AvgAssistProfSalary),
+               names_to = "Rank",values_to = "Salary")%>% 
+  mutate(Rank = Rank %>% str_remove("ProfSalary"))%>%
+  mutate(Rank = Rank %>% str_remove("Avg"))
+```
+
+Lets take a look to see if it worked
+```{r}
+salary
+```
+Great now I can make the plot, at first I didn't have the colors right compared to the example or a minimal theme and accidentally included
+tier VIIB but I got there eventually.
+
+```{r results=FALSE, message=FALSE}
+df<- df %>% full_join(salary)
+```
+To get rid of tier VIIB
+```{r results=FALSE, warning=FALSE}
+selected_tiers <- c("I", "IIA", "IIB")
+```
+Then filter the data to include only those categories
+```{r results=FALSE}
+df <- df[df$Tier %in% selected_tiers, ]
+```
+
+# Now I have the right columns to be able to make the plot 
+```{r plot, warning=FALSE}
+x_colors <- c("#FF9999", "#99FF99", "#9999FF")
+ggplot(df, aes(x=Rank,y=Salary,fill=Rank)) +
+  geom_boxplot()+
+  facet_wrap(~Tier)+
+  scale_fill_manual(values = x_colors)+
+  theme_minimal()
+```
+
+
+**2. Build an ANOVA model and display the summary output in your report.**
+To build an anova model I simply used the code below
+```{r echo=TRUE}
+model <- aov(Salary ~ State + Rank + Tier, data = df)
+# Print the ANOVA results
+summary(model)
+```
+
+
+**3. The rest of the test uses another data set. The "Juniper_Oils.csv" data. Get it loaded and take a look. Then tidy it! (show the code used for tidying in your report)**
+        
+                                                              

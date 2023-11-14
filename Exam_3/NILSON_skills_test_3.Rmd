@@ -1,0 +1,141 @@
+---
+title: "Exam 3 Jared Nilson"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+___
+
+# Tasks:
+  
+**1. Load and clean FacultySalaries_1995.csv file and Re-create the graph below...**
+
+```{r, echo=FALSE, fig.align='center',fig.width=5,fig.height=5}
+knitr::include_graphics("./Fig1.png")
+```
+
+
+# Loading R programs
+```{r Loading, echo=TRUE, warning=FALSE, message=FALSE}
+library(readr)
+library(tidyverse)
+library(janitor)
+library(easystats)
+library(ggplot2)
+library(broom)
+
+```
+# Reading in the data
+```{r results=FALSE}
+df <- read_csv("FacultySalaries_1995.csv")
+
+```
+
+After looking at the data and the graph that we are supposed to produce I decide that I'll need new column with the college rank of "assoc" "assist"
+or "full" and then facet wrap by tier(exluding VIIB) where x is the new column and y is the salaries for each one so I need to make a new salary column as well.
+
+```{r echo=TRUE}
+salary <- df %>%
+  select(ends_with(c("Salary","ID","Name","State","Tier")))
+salary <- salary %>%
+  pivot_longer(c(AvgFullProfSalary,AvgAssocProfSalary,AvgAssistProfSalary),
+               names_to = "Rank",values_to = "Salary")%>% 
+  mutate(Rank = Rank %>% str_remove("ProfSalary"))%>%
+  mutate(Rank = Rank %>% str_remove("Avg"))
+```
+
+Lets take a look to see if it worked
+```{r}
+salary
+```
+Great now I can make the plot, at first I didn't have the colors right compared to the example or a minimal theme and accidentally included
+tier VIIB but I got there eventually.
+
+```{r results=FALSE, message=FALSE}
+df<- df %>% full_join(salary)
+```
+To get rid of tier VIIB
+```{r results=FALSE, warning=FALSE}
+selected_tiers <- c("I", "IIA", "IIB")
+```
+Then filter the data to include only those categories and plot
+```{r results=FALSE}
+df <- df[df$Tier %in% selected_tiers, ]
+```
+
+# First Plot
+
+```{r plot, warning=FALSE}
+x_colors <- c("#FF9999", "#99FF99", "#9999FF")
+ggplot(df, aes(x=Rank,y=Salary,fill=Rank)) +
+  geom_boxplot()+
+  facet_wrap(~Tier)+
+  scale_fill_manual(values = x_colors)+
+  theme_minimal()
+```
+
+
+**2. Build an ANOVA model and display the summary output in your report.**
+To build an anova model I simply used the code below
+```{r echo=TRUE}
+model <- aov(Salary ~ State + Rank + Tier, data = df)
+# Print the ANOVA results
+summary(model)
+```
+
+
+**3. The rest of the test uses another data set. The "Juniper_Oils.csv" data. Get it loaded and take a look. Then tidy it! (show the code used for tidying in your report)**
+        
+# Reading in the second dataset
+```{r results=FALSE}
+df2 <- read.csv("Juniper_Oils.csv")
+```
+After looking at the dataset and requested graph I figured that I need a column with each of the compounds and a column for concentration.
+This tidying can be performed with one **pivot_longer** then I plotted it.
+```{r}
+df2 <- df2 %>% 
+  pivot_longer(c("alpha.pinene","para.cymene","alpha.terpineol","cedr.9.ene","alpha.cedrene","beta.cedrene",
+                 "cis.thujopsene","alpha.himachalene","beta.chamigrene","cuparene","compound.1","alpha.chamigrene",
+                 "widdrol","cedrol","beta.acorenol","alpha.acorenol","gamma.eudesmol","beta.eudesmol","alpha.eudesmol",
+                 "cedr.8.en.13.ol","cedr.8.en.15.ol","compound.2","thujopsenal"),
+               names_to = "Chemical_Name", values_to = "Concentration")
+```
+**4. Make me a graph of the following:**
+
+        x = YearsSinceBurn
+        y = Concentration
+        facet = ChemicalID (use free y-axis scales)
+        
+# Second Plot
+
+```{r warning=FALSE}
+ggplot(df2, aes(x=YearsSinceBurn, y=Concentration))+
+  geom_smooth(size= 1.75)+
+  theme_minimal()+
+  facet_wrap(~Chemical_Name, scales = "free")
+```
+
+**5. Use a generalized linear model to find which chemicals show concentrations that are significantly (significant, as in P < 0.05) affected by "Years Since Burn".**
+
+```{r warning=FALSE}
+model <- glm(formula = Concentration ~ YearsSinceBurn + Chemical_Name, data = df2, family = gaussian)
+
+# Extract and tidy the model coefficients
+tidy_results <- tidy(model)
+
+# Filter for significant results (p-value < 0.05)
+significant_results <- tidy_results[tidy_results$p.value < 0.05, ]
+significant_results
+```
+
+The "Chemical_Name" in front is ugly obviously so I got rid of that and we have our final dataframe.
+```{r}
+df3 <- significant_results %>% mutate(term = term %>% str_remove("Chemical_Name"))
+# Print the significant results
+print(df3)
+
+```
+
