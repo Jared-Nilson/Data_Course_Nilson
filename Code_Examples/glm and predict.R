@@ -64,6 +64,7 @@ m5 <- glm(data=mpg,formula = hwy ~ log(displ))
 
 Titanic %>% as.data.frame()
 
+
 #LOGISTIC REGRESSION MEANS OUTCOME IS TRUE FALSE, 
 #all you have to do is say family = binomial in the formula
 df <- read.csv("./Data/GradSchool_Admissions.csv")

@@ -38,3 +38,20 @@ ggplot(state_max_fatality_rate, aes(x= reorder(Province_State, -Maximum_Fatality
   theme(axis.text.x=element_text(angle = 90))+
   theme(legend.position = "none")
 # I added colors for each state :) maybe bonus points ? lol
+#BONUS QUESTION
+total_cumulative_deaths <- df %>%
+  group_by(Last_Update) %>%
+  summarise(Total_Cumulative_Deaths = sum(Deaths))
+
+ggplot(total_cumulative_deaths, aes(x = Last_Update, y = Total_Cumulative_Deaths)) +
+  geom_line(linewidth=2) +
+  labs(title = "Cumulative Deaths Over Time",
+       x = "Date",
+       y = "Cumulative Deaths",
+       color = "Province/State") +
+  theme(legend.position= "none")
+  theme_minimal()
+
+
+
+
